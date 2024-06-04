@@ -14,7 +14,21 @@ const app = express();
 let numberOfRequestsForUser = {};
 setInterval(() => {
     numberOfRequestsForUser = {};
-}, 1000)
+}, 1000);
+
+function checkLimit(req, res, next) {
+  const userId = req.headers['user-id'];
+  if (!numberOfRequestsForUser[userId]) {
+    numberOfRequestsForUser[userId] = 0;
+  }
+  numberOfRequestsForUser[userId] += 1;
+  if (numberOfRequestsForUser[userId] > 5) {
+    res.status(404).json({ msg: 'Too many requests' });
+}
+next();
+}
+
+app.use(checkLimit);
 
 app.get('/user', function(req, res) {
   res.status(200).json({ name: 'john' });
